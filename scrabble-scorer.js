@@ -2,6 +2,8 @@
 
 const input = require("readline-sync");
 
+let wordToScore = "";
+
 const oldPointStructure = {
   1: ['A', 'E', 'I', 'O', 'U', 'L', 'N', 'R', 'S', 'T'],
   2: ['D', 'G'],
@@ -12,51 +14,119 @@ const oldPointStructure = {
   10: ['Q', 'Z']
 };
 
+const vowelPointStructure = {
+	3: ['A',  'E',  'I',  'O',  'U'],
+	1: ['B',  'C',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  'M',  'N',  'P',  'Q',  'R',  'S',  'T',  'V',  'W',  'X',  'Y',  'Z']
+}
+
 function oldScrabbleScorer(word) {
 	word = word.toUpperCase();
 	let letterPoints = "";
- 
-	for (let i = 0; i < word.length; i++) {
- 
-	  for (const pointValue in oldPointStructure) {
- 
-		 if (oldPointStructure[pointValue].includes(word[i])) {
+ 	for (let i = 0; i < word.length; i++) {
+ 	  for (const pointValue in oldPointStructure) {
+ 		 if (oldPointStructure[pointValue].includes(word[i])) {
 			letterPoints += `Points for '${word[i]}': ${pointValue}\n`
 		 }
- 
-	  }
+ 	  }
 	}
 	return letterPoints;
- }
-
-// your job is to finish writing these functions and variables that we've named //
-// don't change the names or your program won't work as expected. //
+}
 
 function initialPrompt() {
    console.log("Let's play some scrabble! Enter a word:");
+   wordToScore = input.question("Enter a word to score: ");
+}
+
+function simpleScore(word) {
+	return word.length;
+}
+
+function vowelBonusScore(word) {
+	let wordPoints = 0;
+	for (let i = 0; i < word.length; i++) {
+		for (pointValue in vowelPointStructure) {
+			if (vowelPointStructure[pointValue].includes(word[i].toUpperCase())) {
+				wordPoints += Number(pointValue);
+			}
+		}
+	}
+	return wordPoints;
+}
+
+function transform(object) {
+	let newPointObj = {};
+	for (points in object) {
+		for (letters of object[points]) {
+			newPointObj[letters.toLowerCase()] = Number(points);
+		};
+	};
+	return newPointObj;
+}
+
+let newPointStructure = transform(oldPointStructure);
+
+function scrabbleScore(word) {
+	let wordPoints = 0;
+	for (let i = 0; i < word.length; i++) {
+		for (letters in newPointStructure) {
+			if (letters===(word[i].toLowerCase())) {
+				wordPoints += Number(newPointStructure[letters]);
+			}
+		}
+	}
+	return wordPoints;
+}
+
+let simpleScoreObj = {
+	name: "Simple Score",
+	description: "Each letter is worth 1 point.",
+	scorerFunction: function(word) {
+		return simpleScore(word);
+	}
 };
 
-let simpleScore;
+let bonusVowelsObj = {
+	name: "Bonus Vowels",
+	description: "Vowels are 3 pts, consonants are 1 pt.",
+	scorerFunction: function(word) {
+		return vowelBonusScore(word);
+	}
+};
 
-let vowelBonusScore;
+let scrabbleScoreObj = {
+	name: "Scrabble",
+	description: "The traditional scoring algorithm.",
+	scorerFunction: function(word) {
+		return scrabbleScore(word);
+	}
+};
 
-let scrabbleScore;
+const scoringAlgorithms = [simpleScoreObj, bonusVowelsObj, scrabbleScoreObj];
 
-const scoringAlgorithms = [];
-
-function scorerPrompt() {}
-
-function transform() {};
-
-let newPointStructure;
+function scorerPrompt() {
+	let userScoringAlgorithmChoice = "";
+	console.log(`\nThere are ${scoringAlgorithms.length} scoring algorithms available.`);
+	let choices = "";
+	for (let i = 0; i < scoringAlgorithms.length; i++) {
+	//for (elements of scoringAlgorithms) {
+		//console.log(`${i}. ${elements.name}: ${elements["description"]}`);
+		console.log(`${i}. ${scoringAlgorithms[i]["name"]}: ${scoringAlgorithms[i]["description"]}`);
+		if (i < scoringAlgorithms.length - 1) {
+			choices += String(i) + ", ";
+		} else {
+			choices += "or " + String(i);
+		}
+	}
+	userScoringAlgorithmChoice = input.question(`Enter ${choices}: `);
+	console.log("");
+	return scoringAlgorithms[userScoringAlgorithmChoice];
+}
 
 function runProgram() {
    initialPrompt();
-   
+   console.log(`Score for '${wordToScore}': ${scorerPrompt().scorerFunction(wordToScore)}`);
 }
 
-// Don't write any code below this line //
-// And don't change these or your program will not run as expected //
 module.exports = {
    initialPrompt: initialPrompt,
    transform: transform,
@@ -69,4 +139,3 @@ module.exports = {
 	runProgram: runProgram,
 	scorerPrompt: scorerPrompt
 };
-
