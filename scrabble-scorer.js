@@ -103,6 +103,14 @@ let scrabbleScoreObj = {
 
 const scoringAlgorithms = [simpleScoreObj, bonusVowelsObj, scrabbleScoreObj];
 
+function isValidScoringAlgorithm(userInput) {
+	const validChoices = [];
+	for (let i = 0; i < scoringAlgorithms.length; i++) {
+		validChoices.push(String(i))
+	};
+	return validChoices.includes(userInput);
+}
+
 function scorerPrompt() {
 	let userScoringAlgorithmChoice = "";
 	console.log(`\nThere are ${scoringAlgorithms.length} scoring algorithms available.`);
@@ -118,6 +126,9 @@ function scorerPrompt() {
 		}
 	}
 	userScoringAlgorithmChoice = input.question(`Enter ${choices}: `);
+	while (!isValidScoringAlgorithm(userScoringAlgorithmChoice)) {
+		userScoringAlgorithmChoice = input.question(`Enter ${choices}: `);
+	}
 	console.log("");
 	return scoringAlgorithms[userScoringAlgorithmChoice];
 }
