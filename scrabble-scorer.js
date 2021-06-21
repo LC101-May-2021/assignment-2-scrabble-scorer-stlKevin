@@ -64,6 +64,7 @@ function transform(object) {
 }
 
 let newPointStructure = transform(oldPointStructure);
+newPointStructure[' '] = 0;
 
 function scrabbleScore(word) {
 	let wordPoints = 0;
